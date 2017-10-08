@@ -1,13 +1,5 @@
 extern crate invsearch;
-
 extern crate libc;
-
-// struct Invoice {
-//     date: String,
-//     number: String,
-//     sirname: String,
-//     name: String,
-// }
 
 fn main() {
     // Receive command line arguments
@@ -22,6 +14,7 @@ fn main() {
     for arg in args[1..].iter() {
         // Create a path to the desired file
 
+
         let mut file = match ::invsearch::open_file(arg) {
             Err((string, code)) => {
                 eprintln!("{}", string);
@@ -30,16 +23,19 @@ fn main() {
             Ok(f) => f,
         };
 
-        // Read the file contents into a string, returns `io::Result<usize>`
-
-        let file_content = match ::invsearch::read_to_string(&mut file) {
-            Err(e) => {
-                eprintln!("{}", e);
-                ::std::process::exit(::libc::EINVAL)
-            }
-            Ok(s) => s,
+        match ::invsearch::parse_invoice(&mut file) {
+            Ok(inv) => println!("{:?}", inv),
+            Err(e) => eprintln!("'{}': {}", arg, e),
         };
 
-        println!("{}", file_content);
+        // Read the file contents into a string, returns `io::Result<usize>`
+
+        // let file_content = match ::invsearch::read_to_string(&mut file) {
+        //     Err(e) => {
+        //         eprintln!("{}", e);
+        //         ::std::process::exit(::libc::EINVAL)
+        //     }
+        //     Ok(s) => s,
+        // };
     }
 }
