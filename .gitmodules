@@ -1,0 +1,3 @@
+[submodule "invsearch.rs"]
+	path = invsearch.rs
+	url = ./invsearch.rs
