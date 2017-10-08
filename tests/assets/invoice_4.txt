@@ -1,0 +1,28 @@
+﻿Therapeut/in
+Patient/in
+Name/Vorname
+Adresse PLZ/Ort Telefon
+EMR-ZSR-Nr.
+GLN
+Name/Vorname
+Adresse PLZ/Ort Versicherten-Nr. Geburtsdatum
+Döe John
+  Prävention
+  Beschwerde/Krankheit
+  Unfall
+  Einzeltherapie
+  Gruppentherapie
+Behandlungsgrund:
+Verspannungen
+Rechnungsdatum:
+99.99.9999
+Honorarrechnung
+Behandlung
+Datum
+Methode
+Methoden- Nr.
+Beschwerde 	Stunden- ansatz
+Zeitaufwand
+Total                      CHF
+999.00
+Bemerkung

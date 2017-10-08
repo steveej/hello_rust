@@ -1,0 +1,18 @@
+﻿Therapeut/in
+Patient/in
+Name/Vorname
+Strasse/Nr. Ort
+Name/Vorname
+Strasse/Nr. Ort
+Doe John
+  Krankheit
+  Unfall
+Honorarrechnung
+Rechnungsdatum:
+99.99.9999
+Behandlung
+Subtotal
+CHF
+999.00
+Bankverbindung
+TOTAL

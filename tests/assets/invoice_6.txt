@@ -1,0 +1,32 @@
+﻿Therapeut/in
+Patient/in
+Name/Vorname
+Adresse PLZ/Ort Telefon
+Name/Vorname
+Adresse PLZ/Ort Versicherten-Nr. Geburtsdatum
+Doe John
+  Prävention
+  Beschwerde/Krankheit
+  Unfall
+  Einzeltherapie
+  Gruppentherapie
+Behandlungsgrund:
+Verspannungen
+Rechnungsdatum:
+99.99.9999
+Honorarrechnung
+Behandlung
+Datum
+Methode
+Methoden-
+Beschwerde
+Stunden-
+Zeitaufwand
+Betrag
+Nr.
+CHF
+900.00
+Total                      CHF  9'999.00
+Bemerkung
+Totalbetrag
+(Behandlung + Heilmittel)

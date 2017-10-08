@@ -1,0 +1,24 @@
+﻿Therapeut/in*
+Patient/in
+Name/Vorname
+Strasse/Nr. PLZ/Ort
+Name/Vorname
+Strasse/Nr. PLZ/Ort
+Doe  John
+  Prävention
+  Beschwerde/Krankheit
+  Unfall
+  Einzeltherapie
+  Gruppentherapie
+Honorarrechnung
+Rechnungsdatum: Rechnungs-Nr.:
+99.99.9999
+999
+Behandlung
+Datum                Behandlungsmethode                              Methoden-Nr.
+Beschwerde
+Zeit (Min.)
+Total
+CHF
+999.00
+  Behandlung abgeschlossen

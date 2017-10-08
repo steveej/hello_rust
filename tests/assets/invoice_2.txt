@@ -1,0 +1,22 @@
+﻿Therapeut/in*
+Patient/in
+Name/Vorname Strasse/Nr. PLZ/Ort
+Telefon
+EMR-ZSR-Nr. GLN
+Name/Vorname Strasse/Nr. PLZ/Ort Versicherung Versicherten-Nr.
+Geburtsdatum
+Doe John
+Honorarrechnung
+Rechnungsdatum:
+99.99.9999
+Behandlung
+Rechnungs-Nr.:
+999
+Datum
+Behandlungsmethode
+Total
+CHF
+999.00
+  Behandlung
+  Behandlung
+abgeschlossen
