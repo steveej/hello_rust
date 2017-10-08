@@ -1,0 +1,8 @@
+[package]
+name = "invsearch"
+version = "0.1.0"
+authors = ["Stefan Junker <mail@stefanjunker.de>"]
+
+[dependencies]
+assert_cli = "0.5.3"
+libc = "0.2"
