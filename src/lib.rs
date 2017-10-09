@@ -34,11 +34,11 @@ pub struct Invoice {
 impl Invoice {
     pub fn new(sirname: &str, name: &str, date: &str, number: &str, total: &str) -> Invoice {
         ::Invoice {
-            date: date.to_string(),
-            number: number.to_string(),
-            name: name.to_string(),
-            sirname: sirname.to_string(),
-            total: total.to_string(),
+            date: date.trim().to_string(),
+            number: number.trim().to_string(),
+            name: name.trim().to_string(),
+            sirname: sirname.trim().to_string(),
+            total: total.trim().to_string().replace("'", ""),
         }
     }
 }
