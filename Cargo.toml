@@ -8,3 +8,4 @@ assert_cli = "0.5"
 libc = "0.2"
 nom = { version = "3.2" } #, features = ["nightly"] }
 log = "0.3"
+env_logger = "0.4"

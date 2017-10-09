@@ -12,6 +12,7 @@ extern crate nom;
 
 #[macro_use]
 extern crate log;
+extern crate env_logger;
 
 #[macro_export]
 macro_rules! COULDNT_OPEN_ERR { () => { "couldn't open {}: {}" }; }
@@ -152,13 +153,22 @@ pub fn parse_invoice(f: &mut File) -> Result<Invoice, String> {
         fn extract_result<T: Debug>(res: ::nom::IResult<&str, T>) -> Result<T, String> {
             match res {
                 ::nom::IResult::Done(rest, value) => {
+                    // FIXME: doesn't show up
                     debug!("Done\n--- Rest ---\n{}\n--- Value ---\n{:?}\n---",
                            rest,
                            value);
                     Ok(value)
                 }
-                ::nom::IResult::Error(err) => Err(format!("Err {:?}", err)),
-                ::nom::IResult::Incomplete(needed) => Err(format!("Needed {:?}", needed)),
+                ::nom::IResult::Error(err) => {
+                    // FIXME: doesn't show up
+                    warn!("Err {:?}", err);
+                    Err(format!("Err {:?}", err))
+                }
+                ::nom::IResult::Incomplete(needed) => {
+                    // FIXME: doesn't show up
+                    warn!("Needed {:?}", needed);
+                    Err(format!("Needed {:?}", needed))
+                }
             }
         };
 

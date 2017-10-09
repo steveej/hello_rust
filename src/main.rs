@@ -1,7 +1,13 @@
 extern crate invsearch;
 extern crate libc;
 
+#[macro_use]
+extern crate log;
+extern crate env_logger;
+
 fn main() {
+    env_logger::init().unwrap();
+
     // Receive command line arguments
     let args = match ::invsearch::get_args() {
         Err(e) => {
