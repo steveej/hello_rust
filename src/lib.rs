@@ -88,23 +88,7 @@ pub fn parse_invoice(f: &mut File) -> Result<Invoice, String> {
         use std::fmt::Display;
         use std::fmt::Debug;
 
-        // fn dump<T: Debug>(res: ::nom::IResult<&str, T>) {
-        //     match res {
-        //         ::nom::IResult::Done(rest, value) => {
-        //             println!("Done\n--- Rest ---\n{}\n--- Value ---\n{:?}\n---",
-        //                      rest,
-        //                      value)
-        //         }
-        //         ::nom::IResult::Error(err) => println!("Err {:?}", err),
-        //         ::nom::IResult::Incomplete(needed) => println!("Needed {:?}", needed),
-        //     }
-        // }
-
         let buf = ::read_to_string(f).unwrap();
-
-        // let mut contents: Vec<u8> = Vec::new();
-        // let _ = f.read_to_end(&mut contents).unwrap();
-        // let buf = &contents[..];
 
         named!(format1<&str, Invoice>, do_parse!(
                 take_until_and_consume!("Name/Vorname") >>
@@ -192,7 +176,6 @@ pub fn parse_invoice(f: &mut File) -> Result<Invoice, String> {
 
 #[cfg(test)]
 mod tests {
-
     #[test]
     fn parse_sample_invoices() {
         let samples = [("tests/assets/invoice_1.txt",
