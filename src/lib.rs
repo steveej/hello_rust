@@ -60,10 +60,14 @@ pub fn open_file(arg: &String) -> Result<File, (String, i32)> {
     match File::open(&path) {
         // The `description` method of `io::Error` returns a string that
         // describes the error
-        Err(why) => Err((format!(COULDNT_OPEN_ERR!(), display, why.description()), ::libc::ENOENT)),
+        Err(why) => Err((
+            format!(COULDNT_OPEN_ERR!(), display, why.description()),
+            ::libc::ENOENT,
+        )),
         Ok(file) => Ok(file),
     }
 }
+
 
 pub fn read_to_string(f: &mut File) -> Result<String, String> {
     let mut s = String::new();
@@ -73,7 +77,7 @@ pub fn read_to_string(f: &mut File) -> Result<String, String> {
     }
 }
 
-pub fn parse_invoice(f: &mut File) -> Result<Invoice, String> {
+pub fn parse_invoice(buf: String) -> Result<Invoice, String> {
     let sirname: String;
     let name: String;
     let date: String;
@@ -88,8 +92,6 @@ pub fn parse_invoice(f: &mut File) -> Result<Invoice, String> {
     {
         use std::fmt::Display;
         use std::fmt::Debug;
-
-        let buf = ::read_to_string(f).unwrap();
 
         named!(format1<&str, Invoice>, do_parse!(
                 take_until_and_consume!("Name/Vorname") >>
@@ -154,9 +156,11 @@ pub fn parse_invoice(f: &mut File) -> Result<Invoice, String> {
             match res {
                 ::nom::IResult::Done(rest, value) => {
                     // FIXME: doesn't show up
-                    debug!("Done\n--- Rest ---\n{}\n--- Value ---\n{:?}\n---",
-                           rest,
-                           value);
+                    debug!(
+                        "Done\n--- Rest ---\n{}\n--- Value ---\n{:?}\n---",
+                        rest,
+                        value
+                    );
                     Ok(value)
                 }
                 ::nom::IResult::Error(err) => {
@@ -188,23 +192,38 @@ pub fn parse_invoice(f: &mut File) -> Result<Invoice, String> {
 mod tests {
     #[test]
     fn parse_sample_invoices() {
-        let samples = [("tests/assets/invoice_1.txt",
-                        &::Invoice::new("Doe", "John", "99.99.9999", "", "999.00")),
-                       ("tests/assets/invoice_2.txt",
-                        &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00")),
-                       ("tests/assets/invoice_3.txt",
-                        &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00")),
-                       ("tests/assets/invoice_4.txt",
-                        &::Invoice::new("Döe", "John", "99.99.9999", "", "999.00")),
-                       ("tests/assets/invoice_5.txt",
-                        &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00")),
-                       ("tests/assets/invoice_6.txt",
-                        &::Invoice::new("Doe", "John", "99.99.9999", "", "9'999.00"))];
+        let samples = [
+            (
+                "tests/assets/invoice_1.txt",
+                &::Invoice::new("Doe", "John", "99.99.9999", "", "999.00"),
+            ),
+            (
+                "tests/assets/invoice_2.txt",
+                &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
+            ),
+            (
+                "tests/assets/invoice_3.txt",
+                &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
+            ),
+            (
+                "tests/assets/invoice_4.txt",
+                &::Invoice::new("Döe", "John", "99.99.9999", "", "999.00"),
+            ),
+            (
+                "tests/assets/invoice_5.txt",
+                &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
+            ),
+            (
+                "tests/assets/invoice_6.txt",
+                &::Invoice::new("Doe", "John", "99.99.9999", "", "9'999.00"),
+            ),
+        ];
 
         for &(path, invoice_expected) in samples.iter() {
             println!("parsing {}", path);
             let mut f = ::open_file(&path.to_string()).unwrap();
-            let invoice = &::parse_invoice(&mut f).unwrap();
+            let buf = ::read_to_string(&mut f).unwrap();
+            let invoice = &::parse_invoice(buf).unwrap();
             assert_eq!(invoice, invoice_expected);
         }
     }

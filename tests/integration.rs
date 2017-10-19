@@ -1,10 +1,16 @@
-#[macro_use]
 extern crate invsearch;
 
 extern crate libc;
 extern crate assert_cli;
 
+/// Can currently be tested using:
+///
+/// ```bash
+/// for inv in tests/assets/invoice_*; do curl -X POST 127.0.0.1:3000/invoice/parse --data-binary @${inv}; printf n; done
+/// ```
 mod integration {
+    /* TODO: migrate this to a client
+
     use assert_cli;
 
     #[test]
@@ -27,4 +33,5 @@ mod integration {
             // .stderr().contains(MISSING_ARGUMENTS_OUTPUT)
             .unwrap();
     }
+    */
 }
