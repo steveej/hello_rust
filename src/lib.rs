@@ -1,3 +1,9 @@
+#![recursion_limit = "4096"]
+
+pub mod db;
+pub mod schema;
+pub mod models;
+
 use std::env;
 use std::error::Error;
 use std::fs::File;
@@ -5,6 +11,11 @@ use std::io::prelude::*;
 use std::path::Path;
 
 #[macro_use]
+extern crate diesel_codegen;
+
+#[macro_use]
+extern crate diesel;
+
 extern crate libc;
 
 #[macro_use]
@@ -14,6 +25,8 @@ extern crate nom;
 extern crate log;
 extern crate env_logger;
 
+extern crate edit_distance;
+
 #[macro_export]
 macro_rules! COULDNT_OPEN_ERR { () => { "couldn't open {}: {}" }; }
 
@@ -22,27 +35,6 @@ macro_rules! COULDNT_READ_ERR { () => { "couldn't read {:?}: {}" }; }
 
 #[macro_export]
 macro_rules! MISSING_ARGUMENTS_ERR { () => { "No arguments provided. Please provide files to parse." }; }
-
-#[derive(PartialEq, Debug)]
-pub struct Invoice {
-    sirname: String,
-    name: String,
-    date: String,
-    number: String,
-    total: String,
-}
-
-impl Invoice {
-    pub fn new(sirname: &str, name: &str, date: &str, number: &str, total: &str) -> Invoice {
-        ::Invoice {
-            date: date.trim().to_string(),
-            number: number.trim().to_string(),
-            name: name.trim().to_string(),
-            sirname: sirname.trim().to_string(),
-            total: total.trim().to_string().replace("'", ""),
-        }
-    }
-}
 
 pub fn get_args() -> Result<Vec<String>, &'static str> {
     let args: Vec<String> = env::args().collect();
@@ -77,23 +69,34 @@ pub fn read_to_string(f: &mut File) -> Result<String, String> {
     }
 }
 
-pub fn parse_invoice(buf: String) -> Result<Invoice, String> {
-    let sirname: String;
-    let name: String;
-    let date: String;
-    let number: String;
-    let total: String;
+use std::fmt::Debug;
+fn extract_result<T: Debug>(res: ::nom::IResult<&str, T>) -> Result<T, String> {
+    match res {
+        ::nom::IResult::Done(rest, value) => {
+            // FIXME: doesn't show up
+            info!(
+                "Done\n--- Rest ---\n{}\n--- Value ---\n{:?}\n---",
+                rest,
+                value
+            );
+            Ok(value)
+        }
+        ::nom::IResult::Error(err) => {
+            // FIXME: doesn't show up
+            warn!("Err {:?}", err);
+            Err(format!("Err {:?}", err))
+        }
+        ::nom::IResult::Incomplete(needed) => {
+            // FIXME: doesn't show up
+            warn!("Needed {:?}", needed);
+            Err(format!("Needed {:?}", needed))
+        }
+    }
+}
 
-    sirname = String::new();
-    name = String::new();
-    date = String::new();
-    number = String::new();
-    total = String::new();
-    {
-        use std::fmt::Display;
-        use std::fmt::Debug;
+pub fn parse_invoice(buf: String) -> Result<::models::invoice::Invoice, String> {
 
-        named!(format1<&str, Invoice>, do_parse!(
+    named!(format1<&str, ::models::invoice::Invoice>, do_parse!(
                 take_until_and_consume!("Name/Vorname") >>
                 take_until_and_consume!("Name/Vorname") >>
                 take_until_and_consume!("\n") >>
@@ -108,11 +111,11 @@ pub fn parse_invoice(buf: String) -> Result<Invoice, String> {
                 take_until_and_consume!("CHF") >>
                 take_while_s!(|s:char| { s == ' ' || s == '\n'}) >>
                 total: take_until_and_consume!("\n") >>
-                (Invoice::new(sirname, name, date, "", total))
+                (::models::invoice::Invoice::new(sirname, name, date, "", total))
             )
         );
 
-        named!(format2<&str, Invoice>, do_parse!(
+    named!(format2<&str, ::models::invoice::Invoice>, do_parse!(
                 take_until_and_consume!("Name/Vorname") >>
                 take_until_and_consume!("Name/Vorname") >>
                 take_until_and_consume!("\n") >>
@@ -129,11 +132,11 @@ pub fn parse_invoice(buf: String) -> Result<Invoice, String> {
                 take_until_and_consume!("otal") >>
                 take_until_and_consume!("CHF\n") >>
                 total: take_until_and_consume!("\n") >>
-                (Invoice::new(sirname, name, date, number, total))
+                (::models::invoice::Invoice::new(sirname, name, date, number, total))
             )
         );
 
-        named!(format3<&str, Invoice>, do_parse!(
+    named!(format3<&str, ::models::invoice::Invoice>, do_parse!(
                 take_until_and_consume!("Name/Vorname") >>
                 take_until_and_consume!("Name/Vorname") >>
                 take_until_and_consume!("\n") >>
@@ -148,76 +151,84 @@ pub fn parse_invoice(buf: String) -> Result<Invoice, String> {
                 take_until_and_consume!("otal") >>
                 take_until_and_consume!("CHF\n") >>
                 total: take_until_and_consume!("\n") >>
-                (Invoice::new(sirname, name, date, number, total))
+                (::models::invoice::Invoice::new(sirname, name, date, number, total))
             )
         );
 
-        fn extract_result<T: Debug>(res: ::nom::IResult<&str, T>) -> Result<T, String> {
-            match res {
-                ::nom::IResult::Done(rest, value) => {
-                    // FIXME: doesn't show up
-                    debug!(
-                        "Done\n--- Rest ---\n{}\n--- Value ---\n{:?}\n---",
-                        rest,
-                        value
-                    );
-                    Ok(value)
-                }
-                ::nom::IResult::Error(err) => {
-                    // FIXME: doesn't show up
-                    warn!("Err {:?}", err);
-                    Err(format!("Err {:?}", err))
-                }
-                ::nom::IResult::Incomplete(needed) => {
-                    // FIXME: doesn't show up
-                    warn!("Needed {:?}", needed);
-                    Err(format!("Needed {:?}", needed))
-                }
-            }
-        };
-
-        match extract_result(format3(&buf)) {
-            Ok(res3) => Ok(res3),
-            _ => {
-                match extract_result(format2(&buf)) {
-                    Ok(res2) => Ok(res2),
-                    _ => extract_result(format1(&buf)),
-                }
+    match extract_result(format3(&buf)) {
+        Ok(res3) => Ok(res3),
+        _ => {
+            match extract_result(format2(&buf)) {
+                Ok(res2) => Ok(res2),
+                _ => extract_result(format1(&buf)),
             }
         }
     }
+}
+
+pub fn parse_payments(buf: String) -> Result<Vec<::models::payment::Payment>, String> {
+    let mut results: Vec<::models::payment::Payment> = Vec::new();
+
+    for line in buf.split("\n") {
+        let line_items: Vec<String> = line.split(";")
+            .map(|cell: &str| cell.trim().to_string())
+            .collect();
+
+        if line_items.len() < 6 {
+            continue;
+        }
+
+        let date = &line_items[0];
+        let number = &line_items[1];
+        let unused = &line_items[2];
+        let subject = &line_items[3];
+        let invoice_number = &line_items[4];
+        let amount = &line_items[5];
+
+        results.push(::models::payment::Payment::new(
+            &date,
+            &number,
+            &unused,
+            &subject,
+            &invoice_number,
+            &amount,
+        ));
+    }
+
+    Ok(results)
 }
 
 #[cfg(test)]
 mod tests {
     #[test]
     fn parse_sample_invoices() {
-        let samples = [
-            (
-                "tests/assets/invoice_1.txt",
-                &::Invoice::new("Doe", "John", "99.99.9999", "", "999.00"),
-            ),
-            (
-                "tests/assets/invoice_2.txt",
-                &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
-            ),
-            (
-                "tests/assets/invoice_3.txt",
-                &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
-            ),
-            (
-                "tests/assets/invoice_4.txt",
-                &::Invoice::new("Döe", "John", "99.99.9999", "", "999.00"),
-            ),
-            (
-                "tests/assets/invoice_5.txt",
-                &::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
-            ),
-            (
-                "tests/assets/invoice_6.txt",
-                &::Invoice::new("Doe", "John", "99.99.9999", "", "9'999.00"),
-            ),
-        ];
+        let samples =
+            [
+                (
+                    "tests/assets/invoice_1.txt",
+                    &::models::invoice::Invoice::new("Doe", "John", "99.99.9999", "", "999.00"),
+                ),
+                (
+                    "tests/assets/invoice_2.txt",
+                    &::models::invoice::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
+                ),
+                (
+                    "tests/assets/invoice_3.txt",
+                    &::models::invoice::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
+                ),
+                (
+                    "tests/assets/invoice_4.txt",
+                    &::models::invoice::Invoice::new("Döe", "John", "99.99.9999", "", "999.00"),
+                ),
+                (
+                    "tests/assets/invoice_5.txt",
+                    &::models::invoice::Invoice::new("Doe", "John", "99.99.9999", "999", "999.00"),
+                ),
+                (
+                    "tests/assets/invoice_6.txt",
+                    &::models::invoice::Invoice::new("Doe", "John", "99.99.9999", "", "9'999.00"),
+                ),
+            ];
 
         for &(path, invoice_expected) in samples.iter() {
             println!("parsing {}", path);
@@ -225,6 +236,46 @@ mod tests {
             let buf = ::read_to_string(&mut f).unwrap();
             let invoice = &::parse_invoice(buf).unwrap();
             assert_eq!(invoice, invoice_expected);
+        }
+    }
+
+    #[test]
+    fn parse_sample_payments() {
+        let samples = [
+            (
+                "tests/assets/payments_1.txt",
+                [
+                    ::models::payment::Payment::new(
+                        "98.98.9988",
+                        "99998",
+                        "",
+                        "John Döe Nowhere",
+                        "998/9999",
+                        "9099.90",
+                    ),
+                    ::models::payment::Payment::new(
+                        "99.99.2016",
+                        "99999",
+                        "",
+                        "John & Lara Doe Nü Mexico",
+                        "",
+                        "9090.00",
+                    ),
+                ],
+            ),
+        ];
+
+        for &(path, ref payments_expected) in samples.iter() {
+            println!("parsing {}", &path);
+            let mut f = ::open_file(&path.to_string()).unwrap();
+            let buf = ::read_to_string(&mut f).unwrap();
+            let payments = &::parse_payments(buf).unwrap();
+
+            assert_eq!(payments.len(), payments_expected.len());
+
+            for (payment, payment_expected) in payments.iter().zip(payments_expected.iter()) {
+                assert_eq!(payment, payment_expected);
+            }
         }
     }
 }
