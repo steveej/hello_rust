@@ -1,0 +1,8 @@
+[package]
+name = "futures_stream_select_ok"
+version = "0.1.0"
+authors = ["Stefan Junker <mail@stefanjunker.de>"]
+
+[dependencies]
+futures = "0.1"
+tokio= "0.1"
