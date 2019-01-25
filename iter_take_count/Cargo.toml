@@ -1,0 +1,7 @@
+[package]
+name = "iter_take_count"
+version = "0.1.0"
+authors = ["Stefan Junker <mail@stefanjunker.de>"]
+edition = "2018"
+
+[dependencies]
