@@ -1,0 +1,4 @@
+[[package]]
+name = "hello_trait"
+version = "0.1.0"
+
