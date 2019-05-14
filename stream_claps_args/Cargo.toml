@@ -1,0 +1,11 @@
+[package]
+name = "stream_clap_args"
+version = "0.1.0"
+authors = ["Stefan Junker <mail@stefanjunker.de>"]
+edition = "2018"
+
+[dependencies]
+clap = "*"
+futures = "*"
+tokio = "*"
+lazy_static = "*"
