@@ -4,5 +4,7 @@ stdenv.mkDerivation {
   buildInputs = [
     zsh
     rustup
+    pkgconfig
+    openssl
   ];
 }
