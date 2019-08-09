@@ -23,6 +23,34 @@ type WorkMutex = Arc<FuturesMutex<Work>>;
 type WorkCollection = Vec<WorkMutex>;
 type WorkCollectionMutex = FuturesMutex<WorkCollection>;
 
+fn process<T>(work_collection: T) -> AsyncResult<String>
+where
+    T: Iterator<Item = &'static WorkMutex>,
+    T: Sync + Send,
+    T: 'static,
+{
+    let future_work = futures::stream::iter_ok::<_, Error>(work_collection)
+        .fold(
+            futures::future::Either::A(Box::new(futures::future::ok("".to_string()))),
+            |future_input, next_item_mutex| {
+                println!("[] getting work lock...");
+                next_item_mutex
+                    .lock()
+                    .map_err(|_| failure::err_msg("could not acquire the mutex lock"))
+                    .join(future_input)
+                    .map(|(mut next_item, input)| {
+                        println!("[] got work lock!");
+                        println!("[] input: {}", input);
+                        futures::future::Either::B((*next_item).run(input))
+                    })
+            },
+        )
+        .into_future()
+        .flatten();
+
+    Box::new(future_work)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -56,26 +84,7 @@ mod tests {
         let mut runtime = tokio::runtime::Runtime::new().unwrap();
 
         for _ in 0..10 {
-            let future_work = futures::stream::iter_ok::<_, Error>(WORK_COLLECTION.iter())
-                .fold(
-                    futures::future::Either::A(Box::new(futures::future::ok("".to_string()))),
-                    |future_input, next_item_mutex| {
-                        println!("[] getting work lock...");
-                        next_item_mutex
-                            .lock()
-                            .map_err(|_| failure::err_msg("could not acquire the mutex lock"))
-                            .join(future_input)
-                            .map(|(mut next_item, input)| {
-                                println!("[] got work lock!");
-                                println!("[] input: {}", input);
-                                futures::future::Either::B((*next_item).run(input))
-                            })
-                    },
-                )
-                .into_future()
-                .flatten();
-
-            let async_result = Box::new(future_work);
+            let async_result = process(WORK_COLLECTION.iter());
 
             let result: String = runtime.block_on(async_result).expect("work failed");
 
