@@ -8,7 +8,7 @@ use futures::{Future, Stream};
 use futures_locks::Mutex as FuturesMutex;
 use std::sync::Arc;
 
-type AsyncWorkIO<T> = Box<dyn Future<Item = T, Error = Error> + Sync + Send>;
+type AsyncWorkIO<T> = Box<dyn Future<Item = T, Error = Error> + Send>;
 
 struct InternalWorkIO(pub String);
 struct ExternalWorkIO(pub String);

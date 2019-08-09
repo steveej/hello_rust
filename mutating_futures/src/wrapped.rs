@@ -6,7 +6,7 @@ use futures::{Future, Stream};
 use futures_locks::Mutex as FuturesMutex;
 use std::sync::Arc;
 
-type AsyncResult<T> = Box<dyn Future<Item = T, Error = Error> + Sync + Send>;
+type AsyncResult<T> = Box<dyn Future<Item = T, Error = Error> + Send>;
 
 type WorkIO = String;
 
