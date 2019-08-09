@@ -27,9 +27,8 @@ trait AsyncWorkerExternal<T> {
     fn run_external(self: &mut Self, input: WorkIO) -> AsyncResult<WorkIO>;
 }
 
-type Work = Box<dyn AsyncWorker<WorkIO>>;
-type WorkMutex = Arc<FuturesMutex<Work>>;
-type WorkCollection = Vec<WorkMutex>;
+type Work = Arc<FuturesMutex<Box<dyn AsyncWorker<WorkIO>>>>;
+type WorkCollection = Vec<Work>;
 
 struct InternalWorkWrapper<T>(T);
 struct ExternalWorkWrapper<T>(T);
@@ -56,7 +55,7 @@ where
 
 fn process<T>(work_collection: T) -> AsyncResult<WorkIO>
 where
-    T: Iterator<Item = &'static WorkMutex>,
+    T: Iterator<Item = &'static Work>,
     T: Sync + Send,
     T: 'static,
 {

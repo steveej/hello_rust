@@ -9,3 +9,4 @@ extern crate failure;
 // mod plugins;
 mod minimal;
 mod wrapped;
+mod wrapped_enum;
