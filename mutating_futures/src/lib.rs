@@ -8,3 +8,4 @@ extern crate failure;
 
 // mod plugins;
 mod minimal;
+mod wrapped;
