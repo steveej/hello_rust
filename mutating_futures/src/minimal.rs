@@ -1,12 +1,10 @@
 #![allow(dead_code)]
 
-use failure::{Error, Fallible};
+use failure::Error;
 use futures::IntoFuture;
 use futures::{Future, Stream};
 use futures_locks::Mutex as FuturesMutex;
 use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::MutexGuard;
 
 type AsyncResult<T> = Box<dyn Future<Item = T, Error = Error> + Sync + Send>;
 trait ChainedAsyncWork<T>
@@ -54,6 +52,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use failure::Fallible;
 
     struct CountingForwarder(pub usize);
 
