@@ -13,28 +13,18 @@ fn get_lazy_ref() -> &'static String {
     &HELLO
 }
 
-struct SingletonString {
-    pub inner: String,
-}
-
 // this is the approach used by lazy_static crate
 // see: https://stackoverflow.com/questions/27791532/how-do-i-create-a-global-mutable-singleton
 fn get_singleton_ref() -> &'static String {
     use std::mem;
     use std::sync::{Once, ONCE_INIT};
 
-    static mut SINGLETON: *const SingletonString = 0 as *const SingletonString;
+    static mut SINGLETON: *const String = 0 as *const String;
     static ONCE: Once = ONCE_INIT;
 
     unsafe {
-        ONCE.call_once(|| {
-            let singleton = SingletonString {
-                inner: "hello".to_string(),
-            };
-
-            SINGLETON = mem::transmute(Box::new(singleton));
-        });
-        &(*SINGLETON).inner
+        ONCE.call_once(|| SINGLETON = mem::transmute(Box::new("hello".to_string())));
+        &(*SINGLETON)
     }
 }
 
