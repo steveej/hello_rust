@@ -1,3 +1,18 @@
+/// Examples for retrieving static references for runtime variables
+///
+/// Output:
+/// 0x555bf3661ca0
+/// 0x555bf3661ce0
+/// 0x555bf3661d20
+/// lazy_static emits the same address as it uses a static variable
+/// 0x555bf1b4c050
+/// 0x555bf1b4c050
+/// 0x555bf1b4c050
+/// the manual implementation also uses a static variable
+/// 0x555bf3661d80
+/// 0x555bf3661d80
+/// 0x555bf3661d80
+
 #[macro_use]
 extern crate lazy_static;
 
