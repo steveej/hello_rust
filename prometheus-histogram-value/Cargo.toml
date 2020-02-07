@@ -1,0 +1,10 @@
+[package]
+name = "prometheus-histogram-value"
+version = "0.1.0"
+authors = ["Stefan Junker <mail@stefanjunker.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+prometheus = { git = "https://github.com/pingcap/rust-prometheus.git", rev = "d919ccd35976b9b84b8d03c07138c1cc05a36087" }
